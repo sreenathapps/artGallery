@@ -2,45 +2,78 @@ package com.example.artgallery.service;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
+import com.example.artgallery.model.Art;
 import com.example.artgallery.model.Artist;
-import com.example.artgallery.repository.ArtistRepository;
+import com.example.artgallery.repository.ArtJpaRepository;
+import com.example.artgallery.repository.ArtRepository;
+import com.example.artgallery.repository.ArtistJpaRepository;
 
 /**
  * ArtJpaService
  */
 @Service
-public class ArtJpaService implements ArtistRepository {
+public class ArtJpaService implements ArtRepository {
+    @Autowired
+    private ArtJpaRepository artJpaRepository;
+    @Autowired
+    private ArtistJpaRepository artistJpaRepository;
 
     @Override
-    public List<Artist> getArtists() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getArtists'");
+    public List<Art> getArts() {
+        return artJpaRepository.findAll();
     }
 
     @Override
-    public Artist addArtist(Artist artist) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'addArtist'");
+    public Art getArt(int id) {
+        Art art = artJpaRepository.findById(id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return art;
     }
 
     @Override
-    public Artist getArtist(int id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getArtist'");
+    public Art addArt(Art art) {
+        int artistId = art.getArtist().getArtistId();
+        art.setArtist(artistJpaRepository.findById(artistId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.BAD_REQUEST)));
+        return artJpaRepository.save(art);
     }
 
     @Override
-    public Artist updateArtist(int id, Artist gallery) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateArtist'");
+    public Art updateArt(int id, Art art) {
+        Art newArt = artJpaRepository.findById(id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if (art.getTheme() != null) {
+            newArt.setTheme(art.getTheme());
+        }
+        if (art.getArtTitle() != null) {
+            newArt.setArtTitle(art.getArtTitle());
+        }
+        if (art.getArtist() != null) {
+            newArt.setArtist(artistJpaRepository.findById(art.getArtist().getArtistId()).orElseThrow(
+                    () -> new ResponseStatusException(HttpStatus.NOT_FOUND)));
+        }
+        return artJpaRepository.save(newArt);
     }
 
     @Override
-    public void deleteArtist(int id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'deleteArtist'");
+    public void deleteArt(int id) {
+        try {
+            artJpaRepository.deleteById(id);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        throw new ResponseStatusException(HttpStatus.NO_CONTENT);
     }
-    
+
+    @Override
+    public Artist getArtArtist(int artId) {
+        return artJpaRepository.findById(artId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND)).getArtist();
+    }
+
 }

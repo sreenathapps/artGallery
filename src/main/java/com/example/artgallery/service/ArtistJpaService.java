@@ -1,14 +1,17 @@
 package com.example.artgallery.service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.example.artgallery.model.Art;
 import com.example.artgallery.model.Artist;
 import com.example.artgallery.model.Gallery;
+import com.example.artgallery.repository.ArtJpaRepository;
 import com.example.artgallery.repository.ArtistJpaRepository;
 import com.example.artgallery.repository.ArtistRepository;
 import com.example.artgallery.repository.GalleryJpaRepository;
@@ -16,12 +19,14 @@ import com.example.artgallery.repository.GalleryJpaRepository;
 /**
  * ArtistJpaService
  */
-@Repository
+@Service
 public class ArtistJpaService implements ArtistRepository {
     @Autowired
     private ArtistJpaRepository artistJpaRepository;
     @Autowired
     private GalleryJpaRepository galleryJpaRepository;
+    @Autowired
+    private ArtJpaRepository artJpaRepository;
 
     @Override
     public List<Artist> getArtists() {
@@ -31,7 +36,7 @@ public class ArtistJpaService implements ArtistRepository {
     @Override
     public Artist addArtist(Artist artist) {
         List<Integer> galleryIds = new ArrayList<>();
-        for(Gallery g: artist.getGalleries()) {
+        for (Gallery g : artist.getGalleries()) {
             galleryIds.add(g.getGalleryId());
         }
         List<Gallery> galleries = galleryJpaRepository.findAllById(galleryIds);
@@ -44,21 +49,68 @@ public class ArtistJpaService implements ArtistRepository {
 
     @Override
     public Artist getArtist(int id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getArtist'");
+        return artistJpaRepository.findById(id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     @Override
-    public Artist updateArtist(int id, Artist gallery) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateArtist'");
+    public Artist updateArtist(int id, Artist artist) {
+        Artist newArtist = artistJpaRepository.findById(id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if (artist.getArtistName() != null) {
+            newArtist.setArtistName(artist.getArtistName());
+        }
+        if (artist.getGenre() != null) {
+            newArtist.setGenre(artist.getGenre());
+        }
+        if (artist.getGalleries() != null) {
+            List<Integer> galleryIds = new ArrayList<>();
+            for (Gallery g : artist.getGalleries()) {
+                galleryIds.add(g.getGalleryId());
+            }
+
+            List<Gallery> galleries = galleryJpaRepository.findAllById(galleryIds);
+            if (galleries.size() != galleryIds.size()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            }
+
+            newArtist.setGalleries(galleries);
+        }
+
+        return artistJpaRepository.save(newArtist);
     }
 
     @Override
     public void deleteArtist(int id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'deleteArtist'");
+        Artist artist = artistJpaRepository.findById(id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        for (Gallery gallery : artist.getGalleries()) {
+            gallery.getArtists().remove(artist);
+        }
+        galleryJpaRepository.saveAll(artist.getGalleries());
+
+        List<Art> arts = artJpaRepository.findByArtist(artist);
+        for (Art art : arts) {
+            art.setArtist(null);
+        }
+        artJpaRepository.saveAll(arts);
+
+        artistJpaRepository.deleteById(id);
+        throw new ResponseStatusException(HttpStatus.NO_CONTENT);
     }
 
-    
+    @Override
+    public List<Art> getArtistArts(int artistId) {
+        Artist artist = artistJpaRepository.findById(artistId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return artJpaRepository.findByArtist(artist);
+    }
+
+    @Override
+    public List<Gallery> getArtistGalleries(int artistId) {
+        Artist artist = artistJpaRepository.findById(artistId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return artist.getGalleries();
+    }
+
 }

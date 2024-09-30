@@ -19,7 +19,7 @@ public class Art {
     private String theme;
     
     @ManyToOne
-    @JoinColumn(name = "artistId")
+    @JoinColumn(name = "artistid")
     private Artist artist;
 
     public Art() {
