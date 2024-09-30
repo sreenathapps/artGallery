@@ -15,7 +15,6 @@ import com.example.artgallery.model.Art;
 import com.example.artgallery.model.Artist;
 import com.example.artgallery.model.Gallery;
 import com.example.artgallery.service.ArtistJpaService;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 
@@ -48,11 +47,11 @@ public class ArtistController {
     public void deleteArtist(@PathVariable int id) {
         artistJpaService.deleteArtist(id);
     }
-    @GetMapping("/artist/{id}/art")
+    @GetMapping("/artists/{id}/arts")
     public List<Art> getArtistArts(@PathVariable int id) {
         return artistJpaService.getArtistArts(id);
     }
-    @GetMapping("/artist/{id}/galleries")
+    @GetMapping("/artists/{id}/galleries")
     public List<Gallery> getArtistGalleries(@PathVariable int id) {
         return artistJpaService.getArtistGalleries(id);
     }
