@@ -1,13 +1,47 @@
-/*
- * You can use the following import statements
- *
- * import org.springframework.beans.factory.annotation.Autowired;
- * import org.springframework.http.HttpStatus;
- * import org.springframework.stereotype.Service;
- * import org.springframework.web.server.ResponseStatusException;
- * 
- * import java.util.*;
- *
- */
+package com.example.artgallery.service;
 
-// Write your code here
+import java.util.List;
+
+import org.springframework.stereotype.Repository;
+
+import com.example.artgallery.model.Artist;
+import com.example.artgallery.repository.ArtistRepository;
+
+/**
+ * ArtistJpaService
+ */
+@Repository
+public class ArtistJpaService implements ArtistRepository {
+
+    @Override
+    public List<Artist> getArtists() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getArtists'");
+    }
+
+    @Override
+    public Artist addArtist(Artist artist) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'addArtist'");
+    }
+
+    @Override
+    public Artist getArtist(int id) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getArtist'");
+    }
+
+    @Override
+    public Artist updateArtist(int id, Artist gallery) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'updateArtist'");
+    }
+
+    @Override
+    public void deleteArtist(int id) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'deleteArtist'");
+    }
+
+    
+}
